@@ -1,42 +1,27 @@
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.service.ServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import java.util.ArrayList;
+import java.util.List;
 
 public class App {
     public static void main(String[] args) {
-        Alien alien = null;
+        RestaurantRepository repository = new RestaurantRepository();
 
-        // Create a configuration instance and load the configuration file
-        Configuration configuration = new Configuration().configure().addAnnotatedClass(Alien.class);
+        // Add some categories
+        Category category1 = repository.addCategory( "Beverages");
+        Category category2 = repository.addCategory("Desserts");
 
-        // Build a ServiceRegistry using the Configuration
-        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-                .applySettings(configuration.getProperties())
-                .build();
+        // Add some raw materials
+        RawMaterial milk = repository.addRawMaterial("Milk", 1000, Unit.LITER);
+        RawMaterial sugar = repository.addRawMaterial( "Sugar", 500, Unit.KILOGRAMS);
 
-        // Build a SessionFactory using the ServiceRegistry
-        SessionFactory sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+        // Add a product
+        Product product = repository.addProduct("Milkshake", 5.0, ProductSize.MEDIUM, "Delicious milkshake", category1);
 
-        // Open a new session
-        Session session = sessionFactory.openSession();
+        // Create a recipe and associate raw materials
+        Recipe recipe = repository.addRecipe( "Milkshake Recipe", product, new ArrayList<>());
+        repository.addRecipeToRawMaterial( recipe, milk, 200);
+        repository.addRecipeToRawMaterial( recipe, sugar, 50);
 
-        // Begin a transaction
-        Transaction transaction = session.beginTransaction();
-
-        // Commit the transaction
-        transaction.commit();
-
-        alien = session.get(Alien.class,1);
-
-        System.out.println(alien);
-
-        // Close the session
-        session.close();
-
-        // Close the SessionFactory
-        sessionFactory.close();
+        // Close the session factory
+        repository.closeSessionFactory();
     }
 }
