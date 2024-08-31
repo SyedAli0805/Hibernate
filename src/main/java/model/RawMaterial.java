@@ -1,3 +1,6 @@
+package model;
+
+import enums.Unit;
 import jakarta.persistence.*;
 import java.util.List;
 

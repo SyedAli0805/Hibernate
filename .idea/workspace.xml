@@ -5,7 +5,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3d5740f7-f401-41be-85d7-a070f12a1cf0" name="Changes" comment="Other than Order Module , Everything Up and Running">
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/app/App.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/app/TableManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/enums/DiningOption.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/enums/OrderStatus.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/model/Order.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/App.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Category.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/model/Category.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/DiningOption.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Order.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/model/Product.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ProductSize.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/enums/ProductSize.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/RawMaterial.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/model/RawMaterial.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Recipe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/model/Recipe.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/RecipeToRawMaterial.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/model/RecipeToRawMaterial.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Restaurant.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/RestaurantApp.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/RestaurantRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/repository/RestaurantRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Table.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Unit.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/enums/Unit.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,8 +41,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Enum" />
         <option value="Class" />
+        <option value="Enum" />
       </list>
     </option>
   </component>
@@ -76,19 +97,10 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager">
-    <configuration name="RestaurantRepository" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="RestaurantRepository" />
-      <module name="Hibernate-ORM-Tutorial" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Application.RestaurantRepository" />
-      </list>
-    </recent_temporary>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Work\Java Codes\Hibernate-ORM-Tutorial\src\main\java" />
+    </key>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -108,7 +120,9 @@
       <updated>1724737247102</updated>
       <workItem from="1724737248169" duration="5426000" />
       <workItem from="1724846583478" duration="19798000" />
-      <workItem from="1724945989414" duration="6183000" />
+      <workItem from="1724945989414" duration="14686000" />
+      <workItem from="1725089486414" duration="5322000" />
+      <workItem from="1725127356937" duration="1540000" />
     </task>
     <task id="LOCAL-00001" summary="Initial Commit , Learning Hibernate">
       <option name="closed" value="true" />

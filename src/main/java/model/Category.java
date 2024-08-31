@@ -1,3 +1,5 @@
+package model;
+
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -10,17 +12,8 @@ public class Category {
 
     private String name;
 
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "category",fetch = FetchType.EAGER)
     private List<Product> products = new ArrayList<>();
-
-    @Override
-    public String toString() {
-        return "Category{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", products=" + products +
-                '}';
-    }
 
     public int getId() {
         return id;

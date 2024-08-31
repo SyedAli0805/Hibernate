@@ -1,3 +1,11 @@
+package repository;
+
+import app.TableManager;
+import enums.DiningOption;
+import enums.OrderStatus;
+import enums.ProductSize;
+import enums.Unit;
+import model.*;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -6,11 +14,13 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class RestaurantRepository {
 
     private static SessionFactory sessionFactory;
+    private TableManager tableManager;
 
     public RestaurantRepository() {
         if (sessionFactory == null) {
@@ -19,7 +29,8 @@ public class RestaurantRepository {
                     .addAnnotatedClass(Category.class)
                     .addAnnotatedClass(RawMaterial.class)
                     .addAnnotatedClass(Recipe.class)
-                    .addAnnotatedClass(RecipeToRawMaterial.class);
+                    .addAnnotatedClass(RecipeToRawMaterial.class)
+                    .addAnnotatedClass(Order.class);
 
             ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                     .applySettings(configuration.getProperties())
@@ -27,6 +38,7 @@ public class RestaurantRepository {
 
             sessionFactory = configuration.buildSessionFactory(serviceRegistry);
         }
+        tableManager  = new TableManager();
     }
 
     public Session openSession() {
@@ -43,6 +55,18 @@ public class RestaurantRepository {
             e.printStackTrace();
         }
         return rawMaterials;
+    }
+
+    public List<Product> getAllProducts() {
+        List<Product> products = null;
+        try (Session session = openSession()) {
+            Transaction transaction = session.beginTransaction();
+            products = session.createQuery("from Product", Product.class).list();
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return products;
     }
 
     public List<Category> getAllCategories() {
@@ -118,6 +142,17 @@ public class RestaurantRepository {
         return material;
     }
 
+    public Order getOrderById(int orderId) {
+        Order order = null;
+        try (Session session = openSession()) {
+            order = session.get(Order.class, orderId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return order;
+    }
+
+
     public RawMaterial addRawMaterial(String name, double quantity, Unit unit) {
         RawMaterial material = new RawMaterial();
         material.setName(name);
@@ -165,11 +200,12 @@ public class RestaurantRepository {
         return recipe;
     }
 
-    public RecipeToRawMaterial addRecipeToRawMaterial(Recipe recipe, RawMaterial rawMaterial, int quantity) {
+    public RecipeToRawMaterial addRecipeToRawMaterial(Recipe recipe, RawMaterial rawMaterial, int quantity, Unit unit) {
         RecipeToRawMaterial recipeToRawMaterial = new RecipeToRawMaterial();
         recipeToRawMaterial.setRecipe(recipe);
         recipeToRawMaterial.setRawMaterial(rawMaterial);
         recipeToRawMaterial.setQuantity(quantity);
+        recipeToRawMaterial.setUnit(unit);
         try (Session session = openSession()) {
             Transaction transaction = session.beginTransaction();
             session.merge(recipeToRawMaterial);
@@ -191,6 +227,55 @@ public class RestaurantRepository {
             e.printStackTrace();
         }
         return category;
+    }
+
+    public Order addOrder(List<Product> products, String tableName, DiningOption diningOption) {
+        if (tableManager.isTableBusy(diningOption, tableName)) {
+            System.out.println("Table is busy. Cannot place a new order.");
+            return null; // or throw an exception
+        }
+
+        Order order = new Order();
+        order.setTableName(tableName);
+        order.setDiningOption(diningOption);
+        order.setOrderDateTime(LocalDateTime.now());
+        order.setStatus(OrderStatus.PLACED);
+
+        // Calculate total price
+        double totalPrice = products.stream().mapToDouble(Product::getPrice).sum();
+        order.setTotalPrice(totalPrice);
+
+        // Set products to the order
+        order.setProducts(products);
+
+        try (Session session = openSession()) {
+            Transaction transaction = session.beginTransaction();
+            session.persist(order);
+            transaction.commit();
+
+            // Mark the table as busy
+            tableManager.setTableBusy(diningOption, tableName, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return order;
+    }
+
+    public void payOrder(Order order) {
+        try (Session session = openSession()) {
+            Transaction transaction = session.beginTransaction();
+
+            // Update order status to PAID
+            order.setStatus(OrderStatus.PAID);
+            session.update(order);
+            transaction.commit();
+
+            // Mark the table as free
+            tableManager.setTableBusy(order.getDiningOption(), order.getTableName(), false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public Product updateProduct(int productId, List<RawMaterial> newMaterials) {

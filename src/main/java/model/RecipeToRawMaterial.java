@@ -1,3 +1,6 @@
+package model;
+
+import enums.Unit;
 import jakarta.persistence.*;
 
 @Entity
@@ -14,6 +17,16 @@ public class RecipeToRawMaterial {
     private RawMaterial rawMaterial;
 
     private int quantity;
+
+    private Unit unit;
+
+    public Unit getUnit() {
+        return unit;
+    }
+
+    public void setUnit(Unit unit) {
+        this.unit = unit;
+    }
 
     // Getters and Setters
     public int getId() {

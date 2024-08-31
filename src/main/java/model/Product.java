@@ -1,3 +1,6 @@
+package model;
+
+import enums.ProductSize;
 import jakarta.persistence.*;
 
 
@@ -12,29 +15,6 @@ public class Product {
     private ProductSize productSize;
     @ManyToOne
     private Category category;
-    @OneToOne
-    private Recipe recipe;
-
-    @Override
-    public String toString() {
-        return "Product{" +
-                "category=" + category +
-                ", id=" + id +
-                ", name='" + name + '\'' +
-                ", price=" + price +
-                ", description='" + description + '\'' +
-                ", productSize=" + productSize +
-                ", recipe=" + recipe +
-                '}';
-    }
-
-    public Recipe getRecipe() {
-        return recipe;
-    }
-
-    public void setRecipe(Recipe recipe) {
-        this.recipe = recipe;
-    }
 
     public ProductSize getProductSize() {
         return productSize;
