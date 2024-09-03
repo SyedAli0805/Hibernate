@@ -16,7 +16,7 @@ public class RecipeToRawMaterial {
     @ManyToOne
     private RawMaterial rawMaterial;
 
-    private int quantity;
+    private double quantity;
 
     private Unit unit;
 
@@ -53,11 +53,11 @@ public class RecipeToRawMaterial {
         this.rawMaterial = rawMaterial;
     }
 
-    public int getQuantity() {
+    public double getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(double quantity) {
         this.quantity = quantity;
     }
 }

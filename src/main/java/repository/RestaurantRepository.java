@@ -81,6 +81,30 @@ public class RestaurantRepository {
         return categories;
     }
 
+    public List<Recipe> getAllRecipes() {
+        List<Recipe> recipes = null;
+        try (Session session = openSession()) {
+            Transaction transaction = session.beginTransaction();
+            recipes = session.createQuery("from Recipe ", Recipe.class).list();
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return recipes;
+    }
+
+    public List<RecipeToRawMaterial> getAllRecipeToRawMaterials() {
+        List<RecipeToRawMaterial> recipeToRawMaterials = null;
+        try (Session session = openSession()) {
+            Transaction transaction = session.beginTransaction();
+            recipeToRawMaterials = session.createQuery("from RecipeToRawMaterial ", RecipeToRawMaterial.class).list();
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return recipeToRawMaterials;
+    }
+
     public List<Product> getProductsByCategory(String categoryName) {
         List<Product> products = null;
         try (Session session = openSession()) {
@@ -200,7 +224,7 @@ public class RestaurantRepository {
         return recipe;
     }
 
-    public RecipeToRawMaterial addRecipeToRawMaterial(Recipe recipe, RawMaterial rawMaterial, int quantity, Unit unit) {
+    public RecipeToRawMaterial addRecipeToRawMaterial(Recipe recipe, RawMaterial rawMaterial, double quantity, Unit unit) {
         RecipeToRawMaterial recipeToRawMaterial = new RecipeToRawMaterial();
         recipeToRawMaterial.setRecipe(recipe);
         recipeToRawMaterial.setRawMaterial(rawMaterial);
@@ -278,12 +302,9 @@ public class RestaurantRepository {
         }
     }
 
-    public Product updateProduct(int productId, List<RawMaterial> newMaterials) {
-        Product product = null;
+    public Product updateProduct(Product product) {
         try (Session session = openSession()) {
             Transaction transaction = session.beginTransaction();
-            product = session.get(Product.class, productId);
-
             if (product != null) {
                 session.merge(product);
             }
@@ -295,10 +316,57 @@ public class RestaurantRepository {
         return product;
     }
 
+    public void updateRawMaterial(RawMaterial material) {
+        try (Session session = openSession()) {
+            Transaction transaction = session.beginTransaction();
+            if (material != null) {
+                session.merge(material);
+            }
+
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteProduct(int productId){
+        try (Session session = openSession()) {
+            Transaction transaction = session.beginTransaction();
+            Product product = session.get(Product.class,productId);
+
+            if (product != null) {
+                session.remove(product);
+            }
+
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void deleteRawMaterial(int rawMaterialId) {
+        try (Session session = openSession()) {
+            Transaction transaction = session.beginTransaction();
+            RawMaterial material = session.get(RawMaterial.class,rawMaterialId);
+
+            if (material != null) {
+                session.remove(material);
+            }
+
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void closeSessionFactory() {
         if (sessionFactory != null) {
             sessionFactory.close();
             sessionFactory = null;
         }
     }
+
+
+
 }

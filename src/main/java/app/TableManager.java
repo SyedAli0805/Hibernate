@@ -11,22 +11,32 @@ public class TableManager {
 
     public TableManager() {
         tables = new HashMap<>();
+
+        // Initialize the map with empty maps for each dining option
         for (DiningOption option : DiningOption.values()) {
-            Map<String, Boolean> tableMap = new HashMap<>();
-            for (int i = 1; i <= NUM_TABLES; i++) {
-                tableMap.put(option.name() + "_Table_" + i, false); // false indicates the table is not busy
-            }
-            tables.put(option, tableMap);
+            tables.put(option, new HashMap<>());
         }
     }
 
-    public boolean isTableBusy(DiningOption option, String tableName) {
-        return tables.get(option).get(tableName);
+    public boolean isTableBusy(DiningOption diningOption, String tableName) {
+        Map<String, Boolean> diningOptionTables = tables.get(diningOption);
+        return diningOptionTables.getOrDefault(tableName, false);
     }
 
-    public void setTableBusy(DiningOption option, String tableName, boolean isBusy) {
-        tables.get(option).put(tableName, isBusy);
+    public void setTableBusy(DiningOption diningOption, String tableName, boolean isBusy) {
+        Map<String, Boolean> diningOptionTables = tables.get(diningOption);
+
+        if (diningOptionTables != null) {
+            diningOptionTables.put(tableName, isBusy);
+        }
     }
 
-    // Additional methods to manage tables can be added here
+    public DiningOption getDiningOption(String tableName) {
+        for (Map.Entry<DiningOption, Map<String, Boolean>> entry : tables.entrySet()) {
+            if (entry.getValue().containsKey(tableName)) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
 }
