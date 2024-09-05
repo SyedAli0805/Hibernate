@@ -93,16 +93,18 @@ public class RestaurantRepository {
         return recipes;
     }
 
-    public List<RecipeToRawMaterial> getAllRecipeToRawMaterials() {
-        List<RecipeToRawMaterial> recipeToRawMaterials = null;
+    public Category getCategoryByName(String name) {
+        Category category = null;
         try (Session session = openSession()) {
             Transaction transaction = session.beginTransaction();
-            recipeToRawMaterials = session.createQuery("from RecipeToRawMaterial ", RecipeToRawMaterial.class).list();
+            category = session.createQuery("from Category where name = :name", Category.class)
+                    .setParameter("name", name)
+                    .uniqueResult();
             transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return recipeToRawMaterials;
+        return category;
     }
 
     public List<Product> getProductsByCategory(String categoryName) {
@@ -137,21 +139,6 @@ public class RestaurantRepository {
         }
         return product;
     }
-
-    public Category getCategoryByName(String name) {
-        Category category = null;
-        try (Session session = openSession()) {
-            Transaction transaction = session.beginTransaction();
-            category = session.createQuery("from Category where name = :name", Category.class)
-                    .setParameter("name", name)
-                    .uniqueResult();
-            transaction.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return category;
-    }
-
     public RawMaterial getRawMaterialByName(String name) {
         RawMaterial material = null;
         try (Session session = openSession()) {
@@ -166,6 +153,21 @@ public class RestaurantRepository {
         return material;
     }
 
+
+    public Recipe getRecipeByName(String name) {
+        Recipe recipe = null;
+        try (Session session = openSession()) {
+            Transaction transaction = session.beginTransaction();
+            recipe = session.createQuery("from Recipe where name = :name", Recipe.class)
+                    .setParameter("name", name)
+                    .uniqueResult();
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return recipe;
+    }
+
     public Order getOrderById(int orderId) {
         Order order = null;
         try (Session session = openSession()) {
@@ -176,6 +178,18 @@ public class RestaurantRepository {
         return order;
     }
 
+    public Category addCategory(String name) {
+        Category category = new Category();
+        category.setName(name);
+        try (Session session = openSession()) {
+            Transaction transaction = session.beginTransaction();
+            session.merge(category);
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return category;
+    }
 
     public RawMaterial addRawMaterial(String name, double quantity, Unit unit) {
         RawMaterial material = new RawMaterial();
@@ -217,42 +231,21 @@ public class RestaurantRepository {
         try (Session session = openSession()) {
             Transaction transaction = session.beginTransaction();
             session.merge(recipe);
+            for (RecipeToRawMaterial recipeToRawMaterial : materials) {
+                RecipeToRawMaterial material;
+                material = recipeToRawMaterial;
+                material.setRecipe(recipe);
+                material.setRawMaterial(material.getRawMaterial());
+                material.setQuantity(material.getQuantity());
+                material.setUnit(material.getUnit());
+                session.merge(material);
+            }
             transaction.commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return recipe;
     }
-
-    public RecipeToRawMaterial addRecipeToRawMaterial(Recipe recipe, RawMaterial rawMaterial, double quantity, Unit unit) {
-        RecipeToRawMaterial recipeToRawMaterial = new RecipeToRawMaterial();
-        recipeToRawMaterial.setRecipe(recipe);
-        recipeToRawMaterial.setRawMaterial(rawMaterial);
-        recipeToRawMaterial.setQuantity(quantity);
-        recipeToRawMaterial.setUnit(unit);
-        try (Session session = openSession()) {
-            Transaction transaction = session.beginTransaction();
-            session.merge(recipeToRawMaterial);
-            transaction.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return recipeToRawMaterial;
-    }
-
-    public Category addCategory(String name) {
-        Category category = new Category();
-        category.setName(name);
-        try (Session session = openSession()) {
-            Transaction transaction = session.beginTransaction();
-            session.merge(category);
-            transaction.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return category;
-    }
-
     public Order addOrder(List<Product> products, String tableName, DiningOption diningOption) {
         if (tableManager.isTableBusy(diningOption, tableName)) {
             System.out.println("Table is busy. Cannot place a new order.");
@@ -302,7 +295,7 @@ public class RestaurantRepository {
         }
     }
 
-    public Product updateProduct(Product product) {
+    public void updateProduct(Product product) {
         try (Session session = openSession()) {
             Transaction transaction = session.beginTransaction();
             if (product != null) {
@@ -313,7 +306,6 @@ public class RestaurantRepository {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return product;
     }
 
     public void updateRawMaterial(RawMaterial material) {
@@ -328,6 +320,35 @@ public class RestaurantRepository {
             e.printStackTrace();
         }
     }
+
+    public void updateRecipe(String newRecipeName, Product newProduct, List<RecipeToRawMaterial> newRecipeToRawMaterials) {
+        try(Session session = openSession()){
+            Transaction transaction = session.beginTransaction();
+            Recipe recipe = getRecipeByName(newRecipeName);
+            if (recipe != null) {
+                // Update the Recipe's fields
+                recipe.setName(newRecipeName);
+                recipe.setProduct(newProduct);
+
+                // Clear existing raw materials and set the new list
+               List<RecipeToRawMaterial> materials =  recipe.getMaterials();
+               for (RecipeToRawMaterial material: materials) {
+                   session.remove(material);
+               }
+
+               for (RecipeToRawMaterial material: newRecipeToRawMaterials) {
+                   session.merge(material);
+               }
+                session.merge(recipe);
+            }
+
+            transaction.commit();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public void deleteProduct(int productId){
         try (Session session = openSession()) {
@@ -360,6 +381,23 @@ public class RestaurantRepository {
         }
     }
 
+    public void deleteRecipe(int recipeId) {
+        try (Session session = openSession()) {
+            Transaction transaction = session.beginTransaction();
+            Recipe recipe = session.get(Recipe.class,recipeId);
+
+            if (recipe != null) {
+                for (RecipeToRawMaterial rtm: recipe.getMaterials()){
+                    session.remove(rtm);
+                }
+                session.remove(recipe);
+            }
+
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     public void closeSessionFactory() {
         if (sessionFactory != null) {
             sessionFactory.close();

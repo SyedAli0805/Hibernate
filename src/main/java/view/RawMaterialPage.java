@@ -32,9 +32,9 @@ public class RawMaterialPage extends JPanel {
 
         // Panel for buttons
         JPanel buttonPanel = new JPanel();
-        addButton = new JButton("Add New Product");
-        editButton = new JButton("Edit Product");
-        deleteButton = new JButton("Delete Product");
+        addButton = new JButton("Add New Raw Material");
+        editButton = new JButton("Edit Raw Material");
+        deleteButton = new JButton("Delete Raw Material");
 
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);

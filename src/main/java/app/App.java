@@ -1,9 +1,9 @@
 package app;
 
-
 import view.Dashboard;
 
 import javax.swing.*;
+
 
 
 public class App {

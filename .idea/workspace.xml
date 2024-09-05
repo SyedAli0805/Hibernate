@@ -4,23 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3d5740f7-f401-41be-85d7-a070f12a1cf0" name="Changes" comment="Worked on order module, backend is almost already other than reports, will work on reports and front-end tomorrow.">
-      <change afterPath="$PROJECT_DIR$/src/main/java/view/Category.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/view/Dashboard.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/view/FilePage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/view/HomePage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/view/NavigationBar.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/view/Order.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/view/OrderPage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/view/ProductsPage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/view/RawMaterialPage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/view/RecipePage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/view/Table.java" afterDir="false" />
+    <list default="true" id="3d5740f7-f401-41be-85d7-a070f12a1cf0" name="Changes" comment="Added GUI to the backend, CRUD through ProductsPage, CRUD through RawMaterialPage, RecipePage is working partially but have some errors, it needs working.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/app/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/app/App.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/app/TableManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/app/TableManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/model/RecipeToRawMaterial.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/model/RecipeToRawMaterial.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/model/Recipe.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/model/Recipe.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/repository/RestaurantRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/repository/RestaurantRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/RawMaterialPage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/RawMaterialPage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/RecipePage.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/RecipePage.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/hibernate.cfg.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -139,7 +130,8 @@
       <workItem from="1725089486414" duration="5322000" />
       <workItem from="1725127356937" duration="1992000" />
       <workItem from="1725176354613" duration="20050000" />
-      <workItem from="1725338807270" duration="20022000" />
+      <workItem from="1725338807270" duration="20573000" />
+      <workItem from="1725425132285" duration="22649000" />
     </task>
     <task id="LOCAL-00001" summary="Initial Commit , Learning Hibernate">
       <option name="closed" value="true" />
@@ -165,7 +157,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725129236822</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Added GUI to the backend, CRUD through ProductsPage, CRUD through RawMaterialPage, RecipePage is working partially but have some errors, it needs working.">
+      <option name="closed" value="true" />
+      <created>1725387455527</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1725387455527</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -218,6 +218,7 @@
     <MESSAGE value="Initial Commit , Learning Hibernate" />
     <MESSAGE value="Other than Order Module , Everything Up and Running" />
     <MESSAGE value="Worked on order module, backend is almost already other than reports, will work on reports and front-end tomorrow." />
-    <option name="LAST_COMMIT_MESSAGE" value="Worked on order module, backend is almost already other than reports, will work on reports and front-end tomorrow." />
+    <MESSAGE value="Added GUI to the backend, CRUD through ProductsPage, CRUD through RawMaterialPage, RecipePage is working partially but have some errors, it needs working." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added GUI to the backend, CRUD through ProductsPage, CRUD through RawMaterialPage, RecipePage is working partially but have some errors, it needs working." />
   </component>
 </project>

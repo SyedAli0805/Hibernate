@@ -14,9 +14,10 @@ public class Recipe {
     private String name;
 
     @OneToOne
+    @JoinColumn(unique = true)
     private Product product;
 
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER,mappedBy = "recipe")
     private List<RecipeToRawMaterial> materials;
 
     // Getters and Setters
