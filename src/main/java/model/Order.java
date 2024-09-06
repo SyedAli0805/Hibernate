@@ -1,31 +1,25 @@
 package model;
 
-import enums.DiningOption;
 import enums.OrderStatus;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "`Order`")
+@Table(name = "`OrderPage`")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
-    private String tableName; // Name of the table associated with this order
-    private DiningOption diningOption; // The dining option for this order
-    private LocalDateTime orderDateTime; // Timestamp for the order
+    @ManyToOne
+    private RestaurantTable restaurantTable;
+    private LocalDateTime orderDateTime;
     private double totalPrice;
     private OrderStatus status;
-
-
     @ManyToMany
-    private List<Product> products; // List of products in the order
+    private List<Product> products;
 
     // Getters and Setters
-
-
 
     public int getId() {
         return id;
@@ -35,20 +29,12 @@ public class Order {
         this.id = id;
     }
 
-    public String getTableName() {
-        return tableName;
+    public RestaurantTable getTable() {
+        return restaurantTable;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
-    public DiningOption getDiningOption() {
-        return diningOption;
-    }
-
-    public void setDiningOption(DiningOption diningOption) {
-        this.diningOption = diningOption;
+    public void setTable(RestaurantTable restaurantTable) {
+        this.restaurantTable = restaurantTable;
     }
 
     public LocalDateTime getOrderDateTime() {

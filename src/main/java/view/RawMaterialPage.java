@@ -7,8 +7,7 @@ import repository.RestaurantRepository;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -46,40 +45,32 @@ public class RawMaterialPage extends JPanel {
         loadRawMaterials();
 
         // Add Action Listeners
-        addButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showRawMaterialForm("Add", null);
+        addButton.addActionListener(e -> showRawMaterialForm("Add", null));
+
+        editButton.addActionListener(e -> {
+            int selectedRow = rawMaterialTable.getSelectedRow();
+            if (selectedRow != -1) {
+                String name = (String) tableModel.getValueAt(selectedRow, 0);
+                Double quantity = (Double) tableModel.getValueAt(selectedRow, 1);
+                String unit = (String) tableModel.getValueAt(selectedRow, 2);
+                showRawMaterialForm("Edit", new String[]{name, String.valueOf(quantity), unit});
+            } else {
+                JOptionPane.showMessageDialog(dashboard, "Please select a raw material to edit.");
             }
         });
 
-        editButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int selectedRow = rawMaterialTable.getSelectedRow();
-                if (selectedRow != -1) {
-                    String name = (String) tableModel.getValueAt(selectedRow, 0);
-                    Double quantity = (Double) tableModel.getValueAt(selectedRow, 1);
-                    String unit = (String) tableModel.getValueAt(selectedRow, 2);
-                    showRawMaterialForm("Edit", new String[]{name, String.valueOf(quantity), unit});
-                } else {
-                    JOptionPane.showMessageDialog(dashboard, "Please select a raw material to edit.");
+        deleteButton.addActionListener(e -> {
+            int selectedRow = rawMaterialTable.getSelectedRow();
+            if (selectedRow != -1) {
+                String name = (String) tableModel.getValueAt(selectedRow, 0);
+                RawMaterial rawMaterial = repository.getRawMaterialByName(name);
+                if (rawMaterial != null) {
+                    repository.deleteRawMaterial(rawMaterial.getId());
+                    // Remove from table
+                    tableModel.removeRow(selectedRow);
                 }
-            }
-        });
-
-        deleteButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int selectedRow = rawMaterialTable.getSelectedRow();
-                if (selectedRow != -1) {
-                    String name = (String) tableModel.getValueAt(selectedRow, 0);
-                    RawMaterial rawMaterial = repository.getRawMaterialByName(name);
-                    if (rawMaterial != null) {
-                        repository.deleteRawMaterial(rawMaterial.getId());
-                        // Remove from table
-                        tableModel.removeRow(selectedRow);
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(dashboard, "Please select a product to delete.");
-                }
+            } else {
+                JOptionPane.showMessageDialog(dashboard, "Please select a product to delete.");
             }
         });
     }

@@ -1,309 +1,396 @@
 package view;
 
+import enums.DiningOption;
+import model.Category;
+import model.Product;
+import model.RestaurantTable;
+import repository.RestaurantRepository;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class OrderPage extends JPanel {
-    private Map<String, Table[]> diningOptions;
-    private JPanel tablesPanel;
+    private JPanel diningOptionPanel;
+    private JPanel tablePanel;
+    private JPanel orderPanel;
     private JPanel categoriesAndProductsPanel;
+    private JPanel categoriesPanel;
+    private JPanel productsPanel;
     private JPanel orderSummaryPanel;
-    private Map<String, Category> categories;
-    private Table currentTable;
-    private JButton confirmOrderButton;
-    private JButton paidButton;
-    private JButton cancelOrderButton;
-    private JLabel totalAmountLabel;
-    private String currentOption;
+    private RestaurantRepository repository;
+
+    private Map<String, List<OrderItem>> tableOrders; // Keeps track of orders for each table
+    private String currentTable;
 
     public OrderPage(Dashboard dashboard) {
         setLayout(new BorderLayout());
 
-        // Initialize dining options with 25 tables each
-        diningOptions = new HashMap<>();
-        String[] options = {"Dine In", "Family Hall", "Take Away", "Home Delivery", "Car Parking"};
-        for (String option : options) {
-            Table[] tables = new Table[25];
-            for (int i = 0; i < 25; i++) {
-                tables[i] = new Table(i + 1);
-            }
-            diningOptions.put(option, tables);
-        }
+        // Initialize Repository
+        repository = new RestaurantRepository();
 
-        // Set default option to "Dine In"
-        currentOption = "Dine In";
+        // Initialize the table orders map
+        tableOrders = new HashMap<>();
 
-        // Create a panel for order types and tables
-        JPanel orderTypeAndTablesPanel = new JPanel(new BorderLayout());
-        JPanel orderTypePanel = new JPanel(new GridLayout(1, 5));
-        for (String option : options) {
-            JButton optionButton = new JButton(option);
-            optionButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    currentOption = option;
-                    showTables(option);
-                }
-            });
-            orderTypePanel.add(optionButton);
-        }
-        orderTypeAndTablesPanel.add(orderTypePanel, BorderLayout.NORTH);
-
-        // Create a panel to display tables
-        tablesPanel = new JPanel(new GridLayout(5, 5));
-        orderTypeAndTablesPanel.add(tablesPanel, BorderLayout.CENTER);
-        add(orderTypeAndTablesPanel, BorderLayout.EAST);
-
-        // Create a panel for categories and products
+        // Initialize the panels
+        diningOptionPanel = new JPanel();
+        tablePanel = new JPanel();
+        orderPanel = new JPanel();
         categoriesAndProductsPanel = new JPanel(new BorderLayout());
-        add(categoriesAndProductsPanel, BorderLayout.CENTER);
+        categoriesPanel = new JPanel();
+        productsPanel = new JPanel();
+        orderSummaryPanel = new JPanel();
 
-        // Create a panel for order summary (receipt)
-        orderSummaryPanel = new JPanel(new BorderLayout());
-        add(orderSummaryPanel, BorderLayout.SOUTH);
+        // Set up the UI and add components
+        setUpUI();
 
-        // Initialize categories and add products
-        initializeCategories();
-
-        // Show tables for the default option
-        showTables(currentOption);
-
-        // Create order buttons
-        confirmOrderButton = new JButton("Confirm Order");
-        confirmOrderButton.setEnabled(false);
-        confirmOrderButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                confirmOrder();
-            }
-        });
-
-        paidButton = new JButton("Paid");
-        paidButton.setEnabled(false);
-        paidButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                payAndResetTable();
-            }
-        });
-
-        cancelOrderButton = new JButton("Cancel Order");
-        cancelOrderButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                cancelOrder();
-            }
-        });
-
-        totalAmountLabel = new JLabel("Total: PKR 0");
-        JPanel orderActionsPanel = new JPanel(new GridLayout(4, 1));
-        orderActionsPanel.add(totalAmountLabel);
-        orderActionsPanel.add(confirmOrderButton);
-        orderActionsPanel.add(paidButton);
-        orderActionsPanel.add(cancelOrderButton);
-
-        orderSummaryPanel.add(orderActionsPanel, BorderLayout.SOUTH);
-
-        // Reset products and categories view
-        showCategories();
+        // Populate categories
+        populateCategories();
     }
 
-    private void initializeCategories() {
+    private void setUpUI() {
+        // Add borders for visualization
+        diningOptionPanel.setBorder(BorderFactory.createTitledBorder("Dining Option"));
+        tablePanel.setBorder(BorderFactory.createTitledBorder("Table Selection"));
+        orderPanel.setBorder(BorderFactory.createTitledBorder("OrderPage Panel"));
+        categoriesAndProductsPanel.setBorder(BorderFactory.createTitledBorder("Categories & Products"));
+        categoriesPanel.setBorder(BorderFactory.createTitledBorder("Categories"));
+        productsPanel.setBorder(BorderFactory.createTitledBorder("Products"));
+        orderSummaryPanel.setBorder(BorderFactory.createTitledBorder("OrderPage Summary"));
 
-    }
+        // Set layout for the order panel
+        orderPanel.setLayout(new BoxLayout(orderPanel, BoxLayout.Y_AXIS));
 
-    private void showCategories() {
-        categoriesAndProductsPanel.removeAll();
-
-        JLabel categoriesLabel = new JLabel("Categories");
-        categoriesAndProductsPanel.add(categoriesLabel, BorderLayout.NORTH);
-
-        JPanel categoriesPanel = new JPanel(new GridLayout(0, 2));
-        for (Category category : categories.values()) {
-            JButton categoryButton = new JButton(category.getName());
-            categoryButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    showProducts(category);
-                }
-            });
-            categoriesPanel.add(categoryButton);
+        // Populate dining options
+        for (DiningOption option : DiningOption.values()) {
+            JButton optionButton = new JButton(option.name().replace("_", " "));
+            diningOptionPanel.add(optionButton);
+            optionButton.addActionListener(new DiningOptionListener(option));
         }
 
-        categoriesAndProductsPanel.add(categoriesPanel, BorderLayout.CENTER);
-        categoriesAndProductsPanel.revalidate();
-        categoriesAndProductsPanel.repaint();
-    }
+        // OrderPage summary buttons
+        JButton confirmOrderButton = new JButton("Confirm OrderPage");
+        JButton cancelOrderButton = new JButton("Cancel OrderPage");
+        JButton markAsPaidButton = new JButton("Mark As Paid");
+        JButton printButton = new JButton("Print");
+        JButton exitButton = new JButton("Exit");
 
-    private void showProducts(Category category) {
-        categoriesAndProductsPanel.removeAll();
+        orderSummaryPanel.add(confirmOrderButton);
+        orderSummaryPanel.add(cancelOrderButton);
+        orderSummaryPanel.add(markAsPaidButton);
+        orderSummaryPanel.add(printButton);
+        orderSummaryPanel.add(exitButton);
 
-        JLabel productsLabel = new JLabel("Products - " + category.getName());
-        categoriesAndProductsPanel.add(productsLabel, BorderLayout.NORTH);
+        // Add ActionListeners for OrderPage actions
+        confirmOrderButton.addActionListener(e -> confirmOrder());
+        cancelOrderButton.addActionListener(e -> cancelOrder());
+        markAsPaidButton.addActionListener(e -> markAsPaid());
+        printButton.addActionListener(e -> printOrder());
 
-        JPanel productsPanel = new JPanel(new GridLayout(0, 2));
-        for (String product : category.getProducts()) {
-            JPanel productPanel = new JPanel(new BorderLayout());
-            JCheckBox productCheckBox = new JCheckBox(product);
-            JTextField quantityField = new JTextField("1", 2);
-
-            // If the product is already selected, check the checkbox and update quantity
-            if (currentTable.getSelectedProducts().containsKey(product)) {
-                productCheckBox.setSelected(true);
-                quantityField.setText(currentTable.getSelectedProducts().get(product).toString());
-            }
-
-            productCheckBox.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    if (productCheckBox.isSelected()) {
-                        int quantity = Integer.parseInt(quantityField.getText());
-                        currentTable.getSelectedProducts().put(product, quantity);
-                    } else {
-                        currentTable.getSelectedProducts().remove(product);
-                    }
-                    updateOrderSummary();
-                }
-            });
-
-            quantityField.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    if (productCheckBox.isSelected()) {
-                        int quantity = Integer.parseInt(quantityField.getText());
-                        currentTable.getSelectedProducts().put(product, quantity);
-                        updateOrderSummary();
-                    }
-                }
-            });
-
-            productPanel.add(productCheckBox, BorderLayout.WEST);
-            productPanel.add(quantityField, BorderLayout.EAST);
-            productsPanel.add(productPanel);
-        }
-
+        // Add the panels to the layout
+        categoriesAndProductsPanel.add(categoriesPanel, BorderLayout.NORTH);
         categoriesAndProductsPanel.add(productsPanel, BorderLayout.CENTER);
 
-        JButton backToCategoriesButton = new JButton("Back to Categories");
-        backToCategoriesButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showCategories();
-            }
-        });
-        categoriesAndProductsPanel.add(backToCategoriesButton, BorderLayout.SOUTH);
-
-        categoriesAndProductsPanel.revalidate();
-        categoriesAndProductsPanel.repaint();
+        add(diningOptionPanel, BorderLayout.NORTH);
+        add(tablePanel, BorderLayout.CENTER);
+        add(categoriesAndProductsPanel, BorderLayout.WEST);
+        add(orderSummaryPanel, BorderLayout.SOUTH);
     }
 
-    private void updateOrderSummary() {
-        orderSummaryPanel.removeAll();
-
-        if (currentTable != null) {
-            JPanel productsListPanel = new JPanel(new GridLayout(0, 1));
-            for (Map.Entry<String, Integer> entry : currentTable.getSelectedProducts().entrySet()) {
-                String product = entry.getKey();
-                int quantity = entry.getValue();
-                productsListPanel.add(new JLabel(product + " x " + quantity));
-            }
-            orderSummaryPanel.add(productsListPanel, BorderLayout.CENTER);
-
-            // Update total amount with quantities
-            int totalAmount = 0;
-            for (int quantity : currentTable.getSelectedProducts().values()) {
-                totalAmount += quantity * 500; // Assuming each product costs PKR 500
-            }
-            totalAmountLabel.setText("Total: PKR " + totalAmount);
-
-            confirmOrderButton.setEnabled(!currentTable.getSelectedProducts().isEmpty());
+    private void populateCategories() {
+        List<Category> categories = repository.getAllCategories();
+        for (Category category : categories) {
+            JButton categoryButton = new JButton(category.getName());
+            categoriesPanel.add(categoryButton);
+            categoryButton.addActionListener(new CategoryButtonListener(category));
         }
-
-        orderSummaryPanel.add(confirmOrderButton, BorderLayout.SOUTH);
-
-        orderSummaryPanel.revalidate();
-        orderSummaryPanel.repaint();
     }
 
     private void confirmOrder() {
-        if (currentTable != null) {
-            currentTable.placeOrder();
-            showReceiptDialog("Order Slip", currentTable.getSelectedProducts());
-            showReceiptDialog("Kitchen Slip", currentTable.getSelectedProducts());
-            paidButton.setEnabled(true);
-        } else {
-            JOptionPane.showMessageDialog(this, "Please select a table first!");
+        if (currentTable == null) {
+            JOptionPane.showMessageDialog(this, "No table selected for the order!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
+
+        List<OrderItem> orderItems = tableOrders.get(currentTable);
+        if (orderItems == null || orderItems.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No items in the order!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Prepare order details
+        double totalPrice = 0.0;
+        List<Product> products = new ArrayList<>();
+        for (OrderItem item : orderItems) {
+            totalPrice += item.getQuantity() * item.getProduct().getPrice();
+            products.add(item.getProduct());
+        }
+
+        // Fetch the selected table from the repository
+        RestaurantTable restaurantTable = repository.getTableByName(currentTable);
+
+        // Add order to the repository
+        repository.addOrder(restaurantTable, totalPrice, enums.OrderStatus.PLACED, products);
+
+        JOptionPane.showMessageDialog(this, "OrderPage confirmed for " + currentTable);
+
+        // Switch back to the table selection panel
+        remove(orderPanel);
+        add(tablePanel, BorderLayout.CENTER);
+        revalidate();
+        repaint();
     }
 
-    private void payAndResetTable() {
-        if (currentTable != null) {
-            showReceiptDialog("Final Receipt", currentTable.getSelectedProducts());
-            currentTable.markAsPaid();
-            resetOrder();
-        }
-    }
-
+    // Handle Cancel OrderPage
     private void cancelOrder() {
-        if (currentTable != null) {
-            currentTable.resetTable();
-            resetOrder();
-        }
+        // Remove the current order from the tableOrders map
+        tableOrders.remove(currentTable);
+
+        // Free up the table in the repository
+        RestaurantTable table = repository.getTableByName(currentTable);
+        model.Order order = repository.getOrderByTable(table);
+        repository.cancelOrder(order);  // Use the OrderPage object to cancel
+
+        // Clear the order panel
+        orderPanel.removeAll();
+        revalidate();
+        repaint();
+
+        JOptionPane.showMessageDialog(this, "OrderPage canceled for " + currentTable);
     }
 
-    private void showTables(String option) {
-        tablesPanel.removeAll();
-
-        Table[] tables = diningOptions.get(option);
-        if (tables == null) {
-            System.out.println("Error: No tables found for the option: " + option);
-            return;
-        }
-        for (Table table : tables) {
-            JButton tableButton = table.getButton();
-            tableButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    currentTable = table;
-                    highlightSelectedTable();
-                    showCategories();
-                }
-            });
-            tablesPanel.add(tableButton);
-        }
-
-        tablesPanel.revalidate();
-        tablesPanel.repaint();
-    }
-
-    private void highlightSelectedTable() {
-        Table[] tables = diningOptions.get(currentOption);
-
-        if (tables == null) {
-            System.out.println("Error: Tables for option '" + currentOption + "' are null.");
+    // Handle Mark As Paid
+    private void markAsPaid() {
+        List<OrderItem> orderItems = tableOrders.get(currentTable);
+        if (orderItems == null || orderItems.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No order to mark as paid!");
             return;
         }
 
-        for (Table table : tables) {
-            JButton button = table.getButton();
-            if (table == currentTable) {
-                button.setBackground(Color.BLUE); // Highlight selected table
-            } else {
-                button.setBackground(table.getColor());
+        // Set table as free after payment
+        RestaurantTable table = repository.getTableByName(currentTable);
+        model.Order order = repository.getOrderByTable(table);
+        repository.payOrder(order);  // Mark the order as paid in the repository
+
+        // Update the table UI to show it is free
+        updateTableStatus(Color.GREEN);
+    }
+
+    private void printOrder() {
+        List<OrderItem> orderItems = tableOrders.get(currentTable);
+        if (orderItems == null || orderItems.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No items in the order!", "Error", JOptionPane.ERROR_MESSAGE);
+        }else {
+            RestaurantTable table = repository.getTableByName(currentTable);
+            model.Order order = repository.getOrderByTable(table);
+            JOptionPane.showMessageDialog(this, "OrderPage printed for " + currentTable);
+        }
+    }
+
+    // Update the status of the current table (for visual feedback)
+    private void updateTableStatus(Color color) {
+        for (Component comp : tablePanel.getComponents()) {
+            if (comp instanceof JButton && ((JButton) comp).getText().contains(currentTable.split("_")[2])) {
+                comp.setBackground(color);
             }
         }
     }
 
-    private void showReceiptDialog(String title, Map<String, Integer> items) {
-        StringBuilder receipt = new StringBuilder();
-        for (Map.Entry<String, Integer> entry : items.entrySet()) {
-            receipt.append(entry.getKey()).append(" x ").append(entry.getValue()).append("\n");
+    // Listener for selecting a dining option
+    private class DiningOptionListener implements ActionListener {
+        private DiningOption selectedOption;
+
+        public DiningOptionListener(DiningOption option) {
+            this.selectedOption = option;
         }
 
-        JOptionPane.showMessageDialog(this, receipt.toString(), title, JOptionPane.INFORMATION_MESSAGE);
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            tablePanel.removeAll();
+
+            // Fetch tables for the selected dining option from the repository
+            List<RestaurantTable> tables = repository.getTablesByDiningOption(selectedOption);
+
+            for (RestaurantTable table : tables) {
+                JButton tableButton = new JButton(table.getTableName());
+                if (table.isBusy()) {
+                    tableButton.setBackground(Color.RED);  // Show busy tables
+                }
+                tableButton.addActionListener(new TableButtonListener(selectedOption, table.getTableName(), tableButton));
+                tablePanel.add(tableButton);
+            }
+
+            revalidate();
+            repaint();
+        }
     }
 
+    // Listener for selecting a table
+    private class TableButtonListener implements ActionListener {
+        private DiningOption diningOption;
+        private String tableName;
+        private JButton tableButton;
 
-    private void resetOrder() {
-        currentTable = null;
-        paidButton.setEnabled(false);
-        confirmOrderButton.setEnabled(false);
-        showCategories();
-        updateOrderSummary();
+        public TableButtonListener(DiningOption diningOption, String tableName, JButton tableButton) {
+            this.diningOption = diningOption;
+            this.tableName = tableName;
+            this.tableButton = tableButton;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            currentTable = tableName;
+
+            // Replace table panel with order panel
+            remove(tablePanel);
+            add(orderPanel, BorderLayout.CENTER);
+
+            // Load existing order for the selected table
+            loadOrderForTable();
+
+            revalidate();
+            repaint();
+
+            // Mark the table as busy
+            tableButton.setBackground(Color.RED);  // Update table button color
+        }
+    }
+
+    // Listener for selecting a product category
+    private class CategoryButtonListener implements ActionListener {
+        private Category category;
+
+        public CategoryButtonListener(Category category) {
+            this.category = category;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // Clear previous products
+            productsPanel.removeAll();
+
+            // Add products based on the selected category
+            List<Product> products = repository.getProductsByCategory(category.getName());
+            for (Product product : products) {
+                JButton productButton = new JButton(product.getName());
+                productsPanel.add(productButton);
+
+                // Add ActionListener to the product button to add the product to the order
+                productButton.addActionListener(new ProductButtonListener(product));
+            }
+
+            revalidate();
+            repaint();
+        }
+    }
+
+    // Listener for selecting a product to add to the order
+    private class ProductButtonListener implements ActionListener {
+        private Product product;
+
+        public ProductButtonListener(Product product) {
+            this.product = product;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            addProductToOrder(product);
+        }
+    }
+
+    // Add a product to the order
+    private void addProductToOrder(Product product) {
+        List<OrderItem> orderItems = tableOrders.getOrDefault(currentTable, new ArrayList<>());
+        boolean productExists = false;
+
+        for (OrderItem item : orderItems) {
+            if (item.getProduct().equals(product)) {
+                item.incrementQuantity();
+                productExists = true;
+                break;
+            }
+        }
+
+        if (!productExists) {
+            orderItems.add(new OrderItem(product, 1));
+        }
+
+        tableOrders.put(currentTable, orderItems);
+        loadOrderForTable();  // Reload the order for the current table to display updates
+    }
+
+    // Load the order for the current table
+    private void loadOrderForTable() {
+        orderPanel.removeAll();
+
+        List<OrderItem> orderItems = tableOrders.get(currentTable);
+        if (orderItems != null) {
+            for (OrderItem item : orderItems) {
+                JPanel productPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                JLabel productLabel = new JLabel(item.getProduct().getName() + " x " + item.getQuantity());
+                JButton increaseButton = new JButton("+");
+                JButton decreaseButton = new JButton("-");
+                JButton removeButton = new JButton("Remove");
+
+                increaseButton.addActionListener(e -> {
+                    item.incrementQuantity();
+                    loadOrderForTable();
+                });
+
+                decreaseButton.addActionListener(e -> {
+                    item.decrementQuantity();
+                    if (item.getQuantity() <= 0) {
+                        orderItems.remove(item);
+                    }
+                    loadOrderForTable();
+                });
+
+                removeButton.addActionListener(e -> {
+                    orderItems.remove(item);
+                    loadOrderForTable();
+                });
+
+                productPanel.add(productLabel);
+                productPanel.add(increaseButton);
+                productPanel.add(decreaseButton);
+                productPanel.add(removeButton);
+                orderPanel.add(productPanel);
+            }
+        }
+
+        revalidate();
+        repaint();
+    }
+    // Inner class to represent an order item
+    private static class OrderItem {
+        private Product product;
+        private int quantity;
+
+        public OrderItem(Product product, int quantity) {
+            this.product = product;
+            this.quantity = quantity;
+        }
+
+        public Product getProduct() {
+            return product;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public void incrementQuantity() {
+            quantity++;
+        }
+
+        public void decrementQuantity() {
+            quantity--;
+        }
     }
 }
+

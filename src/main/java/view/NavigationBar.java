@@ -18,8 +18,8 @@ public class NavigationBar extends JPanel {
         });
         add(homeButton);
 
-        // Order button
-        JButton orderButton = new JButton("Order");
+        // OrderPage button
+        JButton orderButton = new JButton("OrderPage");
         orderButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 dashboard.showPage(new OrderPage(dashboard));
@@ -61,10 +61,10 @@ public class NavigationBar extends JPanel {
                 // Create a dropdown menu or buttons for different reports
                 JPopupMenu reportMenu = new JPopupMenu();
 
-                JMenuItem orderReport = new JMenuItem("Show Order Report");
+                JMenuItem orderReport = new JMenuItem("Show OrderPage Report");
                 orderReport.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        dashboard.showPage(new FilePage(dashboard, "Show Order Report"));
+                        dashboard.showPage(new FilePage(dashboard, "Show OrderPage Report"));
                     }
                 });
                 reportMenu.add(orderReport);
